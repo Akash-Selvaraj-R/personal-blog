@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import DOMPurify from 'dompurify';
+import { useEffect, useState } from 'react';
+// import DOMPurify from 'dompurify';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
@@ -17,18 +17,15 @@ type Props = {
 export default function EditorArea({ value, onChange, onUploadImage }: Props) {
   const [content, setContent] = useState(value);
   const [preview, setPreview] = useState(false);
-  const saveTimer = useRef<number | null>(null);
 
   useEffect(() => setContent(value), [value]);
 
   useEffect(() => {
-    if (saveTimer.current) window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => {
-      onChange(content);
-      if (Notification?.permission === 'granted') new Notification('Auto-save complete');
-    }, 30000); // 30s auto-save
-    return () => { if (saveTimer.current) window.clearTimeout(saveTimer.current); };
-  }, [content, onChange]);
+    // Ensure Notification permission is requested upfront for later use in parent autosave
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   const onPaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     if (!onUploadImage) return;
@@ -47,13 +44,7 @@ export default function EditorArea({ value, onChange, onUploadImage }: Props) {
     }
   };
 
-  useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-  }, []);
-
-  const sanitized = useMemo(() => ({ __html: DOMPurify.sanitize(content) }), [content]);
+  // Preview uses ReactMarkdown with rehype-sanitize; additional DOMPurify available if needed
 
   return (
     <div className="grid gap-3">
@@ -74,7 +65,7 @@ export default function EditorArea({ value, onChange, onUploadImage }: Props) {
       {!preview ? (
         <textarea
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => { setContent(e.target.value); onChange(e.target.value); }}
           onPaste={onPaste}
           className="w-full min-h-[60vh] rounded border p-3 bg-white dark:bg-gray-900 font-mono"
           aria-label="Post content"

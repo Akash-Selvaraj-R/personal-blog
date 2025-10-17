@@ -20,7 +20,8 @@ a {
 /* Scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: theme('colors.gray.400') transparent;
+  /* gray-400 */
+  scrollbar-color: #9ca3af transparent;
 }
 
 /* Typography helpers */

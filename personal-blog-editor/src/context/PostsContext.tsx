@@ -44,15 +44,31 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
+      // Try online first
       const result = await listPosts(query);
       applyResult(result);
+      // Cache for offline
+      localStorage.setItem('posts_cache', JSON.stringify({ query, result }));
     } finally {
       setLoading(false);
     }
   }, [query]);
 
   useEffect(() => {
-    refresh();
+    (async () => {
+      try {
+        await refresh();
+      } catch (err) {
+        // Offline fallback from cache
+        const raw = localStorage.getItem('posts_cache');
+        if (raw) {
+          try {
+            const { result } = JSON.parse(raw);
+            applyResult(result);
+          } catch {}
+        }
+      }
+    })();
   }, [refresh]);
 
   // Realtime sync

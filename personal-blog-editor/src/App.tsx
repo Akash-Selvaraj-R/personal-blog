@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PostsProvider } from './context/PostsContext';
@@ -20,7 +20,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function ThemeGate({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<string>(() => localStorage.getItem('theme') || 'system');
+  const [theme] = useState<string>(() => localStorage.getItem('theme') || 'system');
   useEffect(() => {
     const root = document.documentElement;
     const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);

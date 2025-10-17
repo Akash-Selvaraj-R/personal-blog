@@ -1,10 +1,11 @@
 import { memo, useMemo, useState } from 'react';
 import { usePosts } from '../context/PostsContext';
-import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, useSensor, useSensors, PointerSensor, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { PostCard } from './PostCard';
 import { debounce } from '../utils/debounce';
+import Pagination from './Pagination';
 
 function SortableItem({ id, children }: { id: string; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
@@ -17,7 +18,7 @@ function SortableItem({ id, children }: { id: string; children: React.ReactNode 
 }
 
 function PostListBase() {
-  const { posts, remove, reorder, query, setQuery } = usePosts();
+  const { posts, remove, reorder, query, setQuery, page, pageSize, total } = usePosts();
   const [search, setSearch] = useState(query.search ?? '');
 
   const sensors = useSensors(useSensor(PointerSensor));
@@ -25,9 +26,9 @@ function PostListBase() {
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = posts.findIndex((p) => p.id === active.id);
-    const newIndex = posts.findIndex((p) => p.id === over.id);
-    const newOrder = arrayMove(posts, oldIndex, newIndex).map((p) => p.id);
+    const oldIndex = posts.findIndex((p: any) => p.id === active.id);
+    const newIndex = posts.findIndex((p: any) => p.id === over.id);
+    const newOrder = arrayMove(posts, oldIndex, newIndex).map((p: any) => p.id);
     await reorder(newOrder);
   };
 
@@ -69,6 +70,9 @@ function PostListBase() {
           </div>
         </SortableContext>
       </DndContext>
+      <div className="flex justify-center">
+        <Pagination page={page} pageSize={pageSize} total={total} onPageChange={(p)=> setQuery({ ...query, page: p })} />
+      </div>
     </div>
   );
 }

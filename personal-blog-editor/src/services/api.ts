@@ -15,3 +15,17 @@ api.interceptors.request.use((config) => {
 });
 
 export default api;
+
+// Global 401 handler: clear token and redirect to login
+api.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error?.response?.status === 401) {
+      try { localStorage.removeItem('auth_token'); } catch {}
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);

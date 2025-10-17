@@ -2,6 +2,8 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import { FaMoon, FaRegTrashAlt, FaSignOutAlt, FaSun, FaUser } from 'react-icons/fa';
+import { useState as useReactState } from 'react';
+import ProfileModal from '../pages/ProfileModal';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -14,6 +16,7 @@ export default function Navbar() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  const [profileOpen, setProfileOpen] = useReactState(false);
   return (
     <nav className="sticky top-0 z-10 border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur">
       <div className="container flex items-center gap-4 py-3">
@@ -24,15 +27,16 @@ export default function Navbar() {
           <button aria-label="Toggle theme" onClick={() => setTheme(theme==='dark'?'light':theme==='light'?'system':'dark')} className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
             {document.documentElement.classList.contains('dark') ? <FaSun/> : <FaMoon/>}
           </button>
-          <div className="text-sm flex items-center gap-2">
+          <button onClick={()=>setProfileOpen(true)} className="text-sm flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
             <FaUser/>
             <span>{user?.username || user?.email}</span>
-          </div>
+          </button>
           <button onClick={async ()=>{ await logout(); navigate('/login'); }} className="text-sm flex items-center gap-1 px-3 py-1 rounded bg-gray-200 dark:bg-gray-800">
             <FaSignOutAlt/> Logout
           </button>
         </div>
       </div>
+      <ProfileModal open={profileOpen} onClose={()=>setProfileOpen(false)} />
     </nav>
   );
 }
